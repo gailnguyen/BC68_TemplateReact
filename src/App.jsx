@@ -1,5 +1,8 @@
+import useRoutesCustom from "./hooks/useRoutesCustom";
+
 function App() {
-  return <div className="bg-red-500 text-white">Hello</div>;
+  const routes = useRoutesCustom();
+  return routes;
 }
 
 export default App;
