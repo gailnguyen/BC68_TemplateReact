@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: "https://fiverrnew.cybersoft.edu.vn/api",
   timeout: 30000,
   headers: {
