@@ -20,7 +20,7 @@ const InputCustom = ({
       <input
         type={type}
         className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 ${
-          error && touched ? "border-red-500" : "border-blue-500 "
+          error && touched ? "border-red-500" : "border-blue-500"
         }`}
         placeholder={placeHolder}
         name={name}
