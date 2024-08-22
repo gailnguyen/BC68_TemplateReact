@@ -4,6 +4,7 @@ import { Select, Space } from "antd";
 import { skillService } from "../../services/skill.service";
 import { nguoiDungService } from "../../services/nguoiDung.service";
 import { NotificationContext } from "../../App";
+import { useSelector } from "react-redux";
 
 const options = [];
 for (let i = 10; i < 36; i++) {
@@ -19,9 +20,15 @@ const CreateUser = () => {
   const [listSkill, setListSkill] = useState([]);
 
   // các bước tạo user mới
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
 
   const [isActive, setIsActive] = useState(true);
+
+  // state quản lý avatar
+  const [uploadImg, setUploadImg] = useState(null);
+
+  // thông báo lỗi
+  const [errorImg, setErrorImg] = useState("");
 
   // state quản lý value của 1 object
   const [userValue, setUserValue] = useState({
@@ -35,6 +42,8 @@ const CreateUser = () => {
     skill: [],
     certification: [],
   });
+
+  const { user } = useSelector((state) => state.authSlice);
 
   const handleChangeValue = (event) => {
     const { name, value } = event.target;
@@ -58,6 +67,24 @@ const CreateUser = () => {
         console.log(err);
         handleNotification(err.response.data.content, "error");
       });
+  };
+
+  // hàm xử lý submit avatar
+  const handleSubmitAvatar = (event) => {
+    event.preventDefault();
+    let formData = new FormData();
+    if (uploadImg) {
+      formData.append("formFile", uploadImg.image);
+      nguoiDungService
+        .uploadAvatar(user.token, formData)
+        .then((res) => {
+          console.log(res);
+          handleNotification("Upload avatar thành công", "success");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   };
 
   useEffect(() => {
@@ -195,7 +222,49 @@ const CreateUser = () => {
           </form>
         );
       case 1:
-        return <div>Tôi là layout 2</div>;
+        return (
+          <div>
+            <form onSubmit={handleSubmitAvatar}>
+              <h2>Upload hình ảnh cho người dùng</h2>
+
+              <div className="my-4">
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Avatar
+                </label>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg"
+                  onChange={(event) => {
+                    // cách lấy hình ảnh từ input có type là file
+                    console.log(event.target.files[0]);
+                    const image = event.target.files[0];
+
+                    // tạo đường dẫn để gắn vào thẻ img và hiển thị lên giao diện
+                    if (image) {
+                      // xử lý kiểm tra dung lượng hình, nếu >10MB thì thông báo lỗi và không nhận hình ảnh
+                      if (image.size > 1 * 1024 * 1024) {
+                        setErrorImg("Hình quá kích thước cho phép");
+                        return;
+                      }
+                      const imageUrl = URL.createObjectURL(image);
+                      console.log(imageUrl);
+                      setUploadImg({ image, imageUrl });
+                      setErrorImg("");
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-red-500 italic">{errorImg}</p>
+              <img src={uploadImg?.imageUrl} className="w-32 my-3" alt="" />
+              <button
+                type="submit"
+                className="px-5 py-2 bg-green-700 text-white rounded-md"
+              >
+                Upload hình
+              </button>
+            </form>
+          </div>
+        );
     }
   };
 
